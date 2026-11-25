@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Glira Bharat — Unified ERP, CRM, Billing & E-Commerce Suite</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Desktop Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-mark">GB</div>
+        <div class="logo-text">
+          <h1>Glira Bharat</h1>
+          <span>Enterprise Suite v3.0</span>
+        </div>
+      </div>
+
+      <div class="nav-group-label">CORE OPERATIONS</div>
+      <nav class="nav-list">
+        <button class="nav-btn active" data-module="dashboard">
+          <span class="nav-icon">📊</span><span>Executive Dashboard</span>
+        </button>
+        <button class="nav-btn" data-module="crm">
+          <span class="nav-icon">👥</span><span>CRM & Customers</span>
+          <span class="nav-pill" id="badge-crm">70</span>
+        </button>
+        <button class="nav-btn" data-module="leads">
+          <span class="nav-icon">🎯</span><span>Leads & Pipeline</span>
+          <span class="nav-pill" id="badge-leads">65</span>
+        </button>
+        <button class="nav-btn" data-module="billing">
+          <span class="nav-icon">🧾</span><span>Billing & Invoices</span>
+          <span class="nav-pill" id="badge-billing">75</span>
+        </button>
+      </nav>
+
+      <div class="nav-group-label">COMMERCE & GROWTH</div>
+      <nav class="nav-list">
+        <button class="nav-btn" data-module="inventory">
+          <span class="nav-icon">📦</span><span>Products & Inventory</span>
+          <span class="nav-pill" id="badge-inventory">65</span>
+        </button>
+        <button class="nav-btn" data-module="marketing">
+          <span class="nav-icon">📣</span><span>Marketing Campaigns</span>
+          <span class="nav-pill" id="badge-marketing">55</span>
+        </button>
+        <button class="nav-btn" data-module="storefront">
+          <span class="nav-icon">🛍️</span><span>E-Commerce Storefront</span>
+          <span class="nav-pill accent" id="badge-cart">0</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="sync-status">
+          <span class="pulse-dot"></span> Offline-Ready LocalDB
+        </div>
+        <div class="sidebar-btn-row">
+          <button id="exportAllBtn" class="btn btn-outline btn-xs" title="Download Full JSON Backup">Export DB</button>
+          <button id="resetAllBtn" class="btn btn-ghost btn-xs" title="Restore 390+ Sample Rows">Reset Data</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <div class="workspace">
+      <!-- Top App Bar -->
+      <header class="topbar">
+        <div class="topbar-title-area">
+          <button class="mobile-menu-btn" id="mobileMoreBtn" aria-label="Menu">☰</button>
+          <div>
+            <h2 id="moduleTitle">Executive Dashboard</h2>
+            <p id="moduleSubtitle">Real-time company revenue, pipeline velocity, inventory health & storefront telemetry.</p>
+          </div>
+        </div>
+
+        <div class="topbar-controls">
+          <div class="global-search">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="globalSearchInput" placeholder="Search current module..." />
+          </div>
+          <button id="themeToggleBtn" class="icon-circle-btn" title="Switch Light / Dark Mode">🌓</button>
+          <button id="openStoreCartBtn" class="icon-circle-btn cart-trigger" title="View Storefront Cart">
+            🛒 <span id="topCartCount">0</span>
+          </button>
+          <button id="primaryActionBtn" class="btn btn-primary">+ Quick Create</button>
+        </div>
+      </header>
+
+      <!-- Dynamic Module Container -->
+      <main class="content-scroll" id="mainContainer">
+
+        <!-- 1. EXECUTIVE DASHBOARD -->
+        <section id="mod-dashboard" class="module-view active">
+          <div class="kpi-grid" id="dashboardKpis"></div>
+
+          <div class="dashboard-charts-grid">
+            <div class="panel-card">
+              <div class="panel-head">
+                <h3>Monthly Revenue & Billing Collections</h3>
+                <span class="chip chip-success">+18.4% vs Last Quarter</span>
+              </div>
+              <div id="revenueBarChart" class="svg-chart-wrap"></div>
+            </div>
+
+            <div class="panel-card">
+              <div class="panel-head">
+                <h3>Lead Conversion Funnel</h3>
+                <span class="chip chip-info">65 Active Deals</span>
+              </div>
+              <div id="funnelChart" class="funnel-wrap"></div>
+            </div>
+          </div>
+
+          <div class="dashboard-bottom-grid">
+            <div class="panel-card">
+              <div class="panel-head">
+                <h3>Low Stock & Reorder Alerts</h3>
+                <button class="btn btn-ghost btn-xs" onclick="switchModule('inventory')">Manage Stock →</button>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table compact">
+                  <thead>
+                    <tr><th>SKU</th><th>Product</th><th>Stock</th><th>Action</th></tr>
+                  </thead>
+                  <tbody id="dashLowStockBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel-card">
+              <div class="panel-head">
+                <h3>Recent Invoices & Store Orders</h3>
+                <button class="btn btn-ghost btn-xs" onclick="switchModule('billing')">All Invoices →</button>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table compact">
+                  <thead>
+                    <tr><th>Invoice #</th><th>Customer</th><th>Total</th><th>Status</th></tr>
+                  </thead>
+                  <tbody id="dashRecentInvoicesBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. CRM & CUSTOMERS -->
+        <section id="mod-crm" class="module-view">
+          <div class="toolbar-row">
+            <div class="filter-pills" id="crmSegmentFilters">
+              <button class="pill active" data-filter="ALL">All Customers</button>
+              <button class="pill" data-filter="Enterprise">Enterprise</button>
+              <button class="pill" data-filter="SMB">SMB</button>
+              <button class="pill" data-filter="D2C VIP">D2C VIP</button>
+              <button class="pill" data-filter="Wholesale">Wholesale</button>
+            </div>
+            <div class="toolbar-right">
+              <button class="btn btn-outline btn-sm" onclick="exportModuleCSV('customers')">Export CSV</button>
+              <button class="btn btn-primary btn-sm" onclick="openEntityModal('customer')">+ Add Customer</button>
+            </div>
+          </div>
+          <div class="panel-card no-pad">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Customer ID</th>
+                    <th>Contact & Company</th>
+                    <th>City</th>
+                    <th>Segment</th>
+                    <th>Lifetime Value</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="crmTableBody"></tbody>
+              </table>
+            </div>
+            <div class="pagination-bar" id="crmPagination"></div>
+          </div>
+        </section>
+
+        <!-- 3. LEADS & PIPELINE -->
+        <section id="mod-leads" class="module-view">
+          <div class="toolbar-row">
+            <div class="filter-pills">
+              <button class="pill active" id="leadViewTableBtn" onclick="toggleLeadView('table')">Table View (65)</button>
+              <button class="pill" id="leadViewKanbanBtn" onclick="toggleLeadView('kanban')">Pipeline Board</button>
+            </div>
+            <div class="toolbar-right">
+              <select id="leadStageFilter" class="form-select">
+                <option value="ALL">All Stages</option>
+                <option value="New">New</option>
+                <option value="Contacted">Contacted</option>
+                <option value="Qualified">Qualified</option>
+                <option value="Proposal Sent">Proposal Sent</option>
+                <option value="Negotiation">Negotiation</option>
+                <option value="Won">Won</option>
+                <option value="Lost">Lost</option>
+              </select>
+              <button class="btn btn-primary btn-sm" onclick="openEntityModal('lead')">+ New Lead</button>
+            </div>
+          </div>
+
+          <div id="leadsTableContainer" class="panel-card no-pad">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Lead ID</th>
+                    <th>Prospect / Company</th>
+                    <th>Source</th>
+                    <th>Stage</th>
+                    <th>Deal Value</th>
+                    <th>Lead Score</th>
+                    <th>Owner</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="leadsTableBody"></tbody>
+              </table>
+            </div>
+            <div class="pagination-bar" id="leadsPagination"></div>
+          </div>
+
+          <div id="leadsKanbanContainer" class="kanban-scroller hidden"></div>
+        </section>
+
+        <!-- 4. BILLING & INVOICES -->
+        <section id="mod-billing" class="module-view">
+          <div class="kpi-grid compact-kpis" id="billingKpis"></div>
+          <div class="toolbar-row">
+            <div class="filter-pills" id="billingStatusFilters">
+              <button class="pill active" data-filter="ALL">All Invoices</button>
+              <button class="pill" data-filter="Paid">Paid</button>
+              <button class="pill" data-filter="Pending">Pending</button>
+              <button class="pill" data-filter="Overdue">Overdue</button>
+            </div>
+            <div class="toolbar-right">
+              <button class="btn btn-outline btn-sm" onclick="exportModuleCSV('invoices')">Export CSV</button>
+              <button class="btn btn-primary btn-sm" onclick="openEntityModal('invoice')">+ Create GST Invoice</button>
+            </div>
+          </div>
+
+          <div class="panel-card no-pad">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Invoice #</th>
+                    <th>Client</th>
+                    <th>Date / Due</th>
+                    <th>Subtotal</th>
+                    <th>GST (18%)</th>
+                    <th>Grand Total</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="billingTableBody"></tbody>
+              </table>
+            </div>
+            <div class="pagination-bar" id="billingPagination"></div>
+          </div>
+        </section>
+
+        <!-- 5. PRODUCTS & INVENTORY -->
+        <section id="mod-inventory" class="module-view">
+          <div class="toolbar-row">
+            <div class="filter-pills" id="inventoryCatFilters">
+              <button class="pill active" data-filter="ALL">All Categories</button>
+              <button class="pill" data-filter="Electronics">Electronics</button>
+              <button class="pill" data-filter="Apparel">Apparel</button>
+              <button class="pill" data-filter="Organic Foods">Organic Foods</button>
+              <button class="pill" data-filter="Fitness Gear">Fitness Gear</button>
+              <button class="pill" data-filter="Office Supplies">Office Supplies</button>
+            </div>
+            <div class="toolbar-right">
+              <button class="btn btn-outline btn-sm" onclick="exportModuleCSV('products')">Export Stock CSV</button>
+              <button class="btn btn-primary btn-sm" onclick="openEntityModal('product')">+ Add Product</button>
+            </div>
+          </div>
+
+          <div class="panel-card no-pad">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>SKU</th>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Unit Price</th>
+                    <th>Cost</th>
+                    <th>Stock Qty</th>
+                    <th>Warehouse</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="inventoryTableBody"></tbody>
+              </table>
+            </div>
+            <div class="pagination-bar" id="inventoryPagination"></div>
+          </div>
+        </section>
+
+        <!-- 6. MARKETING CAMPAIGNS -->
+        <section id="mod-marketing" class="module-view">
+          <div class="kpi-grid compact-kpis" id="marketingKpis"></div>
+          <div class="toolbar-row">
+            <div class="filter-pills" id="marketingStatusFilters">
+              <button class="pill active" data-filter="ALL">All Campaigns</button>
+              <button class="pill" data-filter="Active">Active</button>
+              <button class="pill" data-filter="Completed">Completed</button>
+              <button class="pill" data-filter="Scheduled">Scheduled</button>
+            </div>
+            <div class="toolbar-right">
+              <button class="btn btn-primary btn-sm" onclick="openEntityModal('campaign')">+ Launch Campaign</button>
+            </div>
+          </div>
+
+          <div class="panel-card no-pad">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Campaign</th>
+                    <th>Channel</th>
+                    <th>Status</th>
+                    <th>Spend / Budget</th>
+                    <th>Impressions</th>
+                    <th>Clicks (CTR)</th>
+                    <th>ROAS</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="marketingTableBody"></tbody>
+              </table>
+            </div>
+            <div class="pagination-bar" id="marketingPagination"></div>
+          </div>
+        </section>
+
+        <!-- 7. E-COMMERCE STOREFRONT & ORDERS -->
+        <section id="mod-storefront" class="module-view">
+          <div class="store-hero">
+            <div>
+              <span class="store-tag">LIVE D2C STOREFRONT • SYNCED WITH INVENTORY</span>
+              <h2>Glira Bharat Official Store</h2>
+              <p>Browse live catalog items, add to cart, and place instant orders that automatically deduct inventory and generate paid invoices.</p>
+            </div>
+            <div class="store-hero-actions">
+              <button class="btn btn-light" id="toggleStoreTabBtn" onclick="toggleStoreSubtab()">View Online Orders (<span id="ecomOrdersCount">60</span>)</button>
+              <button class="btn btn-primary" onclick="openCartDrawer()">Open Cart (<span id="heroCartCount">0</span>)</button>
+            </div>
+          </div>
+
+          <div id="storeCatalogSection">
+            <div class="toolbar-row">
+              <div class="filter-pills" id="storeCatFilters">
+                <button class="pill active" data-filter="ALL">All Products</button>
+                <button class="pill" data-filter="Electronics">Electronics</button>
+                <button class="pill" data-filter="Apparel">Apparel</button>
+                <button class="pill" data-filter="Organic Foods">Organic Foods</button>
+                <button class="pill" data-filter="Fitness Gear">Fitness Gear</button>
+                <button class="pill" data-filter="Home & Kitchen">Home & Kitchen</button>
+              </div>
+            </div>
+            <div class="store-grid" id="storeProductGrid"></div>
+          </div>
+
+          <div id="storeOrdersSection" class="panel-card no-pad hidden">
+            <div class="panel-head pad-head">
+              <h3>Online Storefront Orders</h3>
+              <button class="btn btn-outline btn-xs" onclick="toggleStoreSubtab()">← Back to Catalog</button>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>City</th>
+                    <th>Items</th>
+                    <th>Total (Incl. GST)</th>
+                    <th>Fulfillment</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="ecomOrdersTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- Mobile App-Like Bottom Navigation Bar -->
+    <nav class="mobile-bottom-nav" id="mobileBottomNav">
+      <button class="mob-nav-item active" data-module="dashboard">
+        <span class="mob-icon">📊</span><span>Home</span>
+      </button>
+      <button class="mob-nav-item" data-module="crm">
+        <span class="mob-icon">👥</span><span>CRM</span>
+      </button>
+      <button class="mob-nav-item" data-module="leads">
+        <span class="mob-icon">🎯</span><span>Leads</span>
+      </button>
+      <button class="mob-nav-item" data-module="billing">
+        <span class="mob-icon">🧾</span><span>Billing</span>
+      </button>
+      <button class="mob-nav-item" data-module="storefront">
+        <span class="mob-icon">🛍️</span><span>Store</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Mobile Drawer for Secondary Modules (Inventory & Marketing) -->
+  <div id="mobileDrawer" class="drawer-backdrop hidden">
+    <div class="mobile-sheet">
+      <div class="sheet-handle"></div>
+      <h3>All Enterprise Modules</h3>
+      <div class="sheet-grid">
+        <button class="sheet-tile" onclick="mobileNavSelect('dashboard')">📊 Executive Dashboard</button>
+        <button class="sheet-tile" onclick="mobileNavSelect('crm')">👥 CRM Customers</button>
+        <button class="sheet-tile" onclick="mobileNavSelect('leads')">🎯 Leads Pipeline</button>
+        <button class="sheet-tile" onclick="mobileNavSelect('billing')">🧾 GST Billing</button>
+        <button class="sheet-tile" onclick="mobileNavSelect('inventory')">📦 Inventory & Stock</button>
+        <button class="sheet-tile" onclick="mobileNavSelect('marketing')">📣 Marketing Campaigns</button>
+        <button class="sheet-tile" onclick="mobileNavSelect('storefront')">🛍️ E-Com Storefront</button>
+        <button class="sheet-tile" onclick="exportAllData()">💾 Export JSON Backup</button>
+      </div>
+      <button class="btn btn-ghost full-btn" onclick="closeMobileDrawer()">Close Menu</button>
+    </div>
+  </div>
+
+  <!-- E-Commerce Shopping Cart Drawer -->
+  <div id="cartDrawer" class="drawer-backdrop hidden">
+    <div class="side-drawer">
+      <div class="drawer-header">
+        <h3>Shopping Cart</h3>
+        <button class="close-x" onclick="closeCartDrawer()">&times;</button>
+      </div>
+      <div id="cartItemsContainer" class="cart-items-list"></div>
+      <div class="cart-footer">
+        <div class="form-group">
+          <label>Customer Name</label>
+          <input type="text" id="checkoutCustName" placeholder="e.g., Arjun Nair" value="Arjun Nair" />
+        </div>
+        <div class="form-group">
+          <label>Delivery City</label>
+          <input type="text" id="checkoutCustCity" placeholder="e.g., Coimbatore" value="Coimbatore" />
+        </div>
+        <div class="cart-totals">
+          <div><span>Subtotal</span><strong id="cartSubtotal">₹0</strong></div>
+          <div><span>GST (18%)</span><strong id="cartTax">₹0</strong></div>
+          <div class="grand"><span>Total Payable</span><strong id="cartGrandTotal">₹0</strong></div>
+        </div>
+        <button class="btn btn-primary full-btn" onclick="completeStoreCheckout()">Place Order & Auto-Generate Invoice</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Universal Create / Edit Modal -->
+  <div id="entityModal" class="drawer-backdrop hidden">
+    <div class="modal-box">
+      <div class="drawer-header">
+        <h3 id="entityModalTitle">Create Record</h3>
+        <button class="close-x" onclick="closeEntityModal()">&times;</button>
+      </div>
+      <form id="entityForm"></form>
+    </div>
+  </div>
+
+  <!-- Printable Invoice Preview Modal -->
+  <div id="invoiceViewModal" class="drawer-backdrop hidden">
+    <div class="modal-box modal-lg">
+      <div class="drawer-header">
+        <h3>Tax Invoice Preview</h3>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline btn-xs" onclick="window.print()">🖨️ Print / PDF</button>
+          <button class="close-x" onclick="closeInvoiceView()">&times;</button>
+        </div>
+      </div>
+      <div id="invoicePrintBody" class="invoice-paper"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="js/seedData.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
